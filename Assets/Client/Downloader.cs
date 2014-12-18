@@ -108,6 +108,14 @@ public class Downloader : MonoBehaviour {
 
 		Texture2D udonTexture = assetBundle.Load(bundleResourceName2) as Texture2D;
 		Debug.Log("udonTexture:" + udonTexture.name);
+
+
+		var sushiCube = GameObject.Find("SushiCube");
+		var udonCube = GameObject.Find("UdonCube");
+
+		Debug.Log("sushiCube:" + sushiCube);
+		Debug.Log("udonCube:" + udonCube);
+
 	}
 
 
@@ -135,4 +143,5 @@ public class Downloader : MonoBehaviour {
 		var localUrlArray = new string[]{projectPath, outputBasePath, bundleName};
 		return fileProtocolStr + CombineAllPath(localUrlArray);
 	}
+
 }
