@@ -20,25 +20,67 @@ public class Downloader : MonoBehaviour {
 	// ファイルプロトコル
 	const string fileProtocolStr = "file://";
 
+	// AssetBundleのDownloadを開始する
+	void Start () {
+		// Downloadを開始する
+		StartCoroutine(DownloadAssetBundleThenCache());
+	}
 
-	IEnumerator CleanCacheThenLoadAssetBundle() {
+
+	/**
+		CacheからResourceの読み込みを行う
+	*/
+	IEnumerator DownloadAssetBundleThenCache() {
+		Debug.Log("start DownloadAssetBundleThenCache");
+		
 		if (!Caching.ready) yield return null;
 
-
-		// キャッシュをクリア
+		// 毎回Downloadから実行するために、Cacheをすべて消す
 		Caching.CleanCache();
 
 
-		// プロジェクトのパスを取得
-		var dataPath = Application.dataPath;
-		var projectPath = Directory.GetParent(dataPath).ToString();
+		string url = GetFileProtocolUrl();
+		int version = 1;
+		uint crc = 0;
 
-		var localUrlArray = new string[]{projectPath, outputBasePath, bundleName};
+		// AssetBundleをファイルプロトコルで取得
+		var www = WWW.LoadFromCacheOrDownload(url, version, crc);
+
+		yield return www;
+
+		if (!String.IsNullOrEmpty(www.error)) {
+			Debug.Log("www.error:" + www.error);
+			yield break;
+		}
 		
+		if (!Caching.IsVersionCached(url, version)) {
+			// 重量のあるResourceだと、Cacheまでに時間がかかるので、cachedになるまで待つ
+			yield return null;
+		}
+		Debug.Log("cached!!");
+		
+		var assetBundle = www.assetBundle;
 
-		var url = fileProtocolStr + Combine(localUrlArray);
-		var version = 1;
-		var crc = 0;
+		// assetBundleを開放
+		assetBundle.Unload(false);
+
+		www.Dispose();
+
+
+		// CacheからAssetBundleを読み出す
+		StartCoroutine(LoadCachedBundle());
+	}
+
+
+	/**
+		CacheからResourceの読み込みを行う
+	*/
+	IEnumerator LoadCachedBundle() {
+		Debug.Log("start LoadCachedBundle");
+
+		string url = GetFileProtocolUrl();
+		int version = 1;
+		uint crc = 0;
 
 		// AssetBundleをファイルプロトコルで取得
 		var www = WWW.LoadFromCacheOrDownload(url, version, crc);
@@ -50,99 +92,30 @@ public class Downloader : MonoBehaviour {
 			yield break;
 		}
 
+		// wwwからAssetBundleを読み出す
 		var assetBundle = www.assetBundle;
+		www.Dispose();
 
-		// loar Resource from AssetBundle
+
+		/*
+			www.assetBundleからAssetBundleを読み出し、
+			AssetBundleからResourceを読み出す。
+
+			AssetBundleに入っているResourceの名前を使用できる。
+		*/
 		Texture2D sushiTexture = assetBundle.Load(bundleResourceName1) as Texture2D;
 		Debug.Log("sushiTexture:" + sushiTexture.name);
 
 		Texture2D udonTexture = assetBundle.Load(bundleResourceName2) as Texture2D;
 		Debug.Log("udonTexture:" + udonTexture.name);
-
-
-		// キャッシュをクリア
-		Caching.CleanCache();
-
-		// assetBundleを開放
-		assetBundle.Unload(false);
-
-		www.Dispose();
 	}
 
 
-	// IEnumerator LoadAssetBundle() {
-	// 	WWW www = WWW.LoadFromCacheOrDownload(url, 1);
-	// 	yield return www;
 
-	// 	Debug.Log("www.error:" + www.error);
-
-	// 	var assetBundle = www.assetBundle;
-
-	// 	if (assetBundle) {
-	// 		Debug.Log("hit!");
-	// 	} else {
-	// 		Debug.Log("failed");
-	// 	}
-	// 	Debug.Log("name:" + assetBundle.name);
-
-	// 	assetBundle.Unload(false);
-	// }
-
-
-
-
-	int cacheState = -1;
-	const int CacheWaiting = 0;
-	const int CacheReady = 1;
-	const int CacheLoad = 2;
-	const int CacheDownloading = 3;
-	
-
-	void Start () {
-		// cacheState = CacheWaiting;
-
-		// 単体で落とす奴
-		StartCoroutine(CleanCacheThenLoadAssetBundle());
-	}
-
-	// Update is called once per frame
-	void Update () {
-		switch (cacheState) {
-			case CacheWaiting: {
-				Debug.Log("waiting...");
-				if (Caching.ready) {
-					cacheState = CacheReady;
-				}
-				break;
-			}
-			case CacheReady: {
-				// var cached = Caching.IsVersionCached(localUrlStr, 1);
-				// if (cached) {
-				// 	cacheState = CacheLoad;
-				// 	StartCoroutine(LoadAssetBundle());
-				// } else {
-				// 	cacheState = CacheDownloading;
-				// 	StartCoroutine(LoadAssetBundle());
-				// }
-				break;
-			}
-			case CacheLoad: {
-				Debug.Log("loading Resource from cache...");
-				break;
-			}
-			case CacheDownloading: {
-				Debug.Log("downloading...");
-				break;
-			}
-
-			default: {
-				// Debug.Log("cacheState:" + cacheState);
-				break;
-			}
-		}
-	}
-
-	private string Combine (string [] paths) {
+	/**
+		Path.CombineのArray版
+	*/
+	private string CombineAllPath (string [] paths) {
 		string combinedPath = "";
 		foreach (var path in paths) {
 			combinedPath = Path.Combine(combinedPath, path);
@@ -150,6 +123,16 @@ public class Downloader : MonoBehaviour {
 		return combinedPath;
 	}
 
+	/**
+		file://プロトコルのurlを返す
+			FULLPATH_OF_PROJECT_FOLDER/bundlize/bundleName
+	*/
+	private string GetFileProtocolUrl () {
+		// プロジェクトのパスを取得
+		var dataPath = Application.dataPath;
+		var projectPath = Directory.GetParent(dataPath).ToString();
 
-
+		var localUrlArray = new string[]{projectPath, outputBasePath, bundleName};
+		return fileProtocolStr + CombineAllPath(localUrlArray);
+	}
 }
