@@ -17,10 +17,7 @@ public class AssetBundleGenerator {
 
 	// AssetBundle化したファイルを置く場所
 	static string outputBasePath = "bundlized";
-
-	// AssetBundleをDownloadするためのurl
-	static string url = Path.Combine("file:///", bundleName);
-
+	
 	
 	[MenuItem ("Window/Generate AssetBundle", false, 1)]
 	static void GenerateAssetBundle () {
