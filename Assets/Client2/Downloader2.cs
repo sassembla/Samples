@@ -4,7 +4,7 @@ using System;
 using System.IO;
 using System.Collections;
 
-public class Downloader : MonoBehaviour {
+public class Downloader2 : MonoBehaviour {
 	/*
 		AssetBundleから取得できるResource名(ファイル自体はjpg)
 	*/
@@ -49,7 +49,7 @@ public class Downloader : MonoBehaviour {
 		yield return www;
 
 		if (!String.IsNullOrEmpty(www.error)) {
-			Debug.Log("www.error:" + www.error);
+			Debug.LogError("DownloadAssetBundleThenCache www.error:" + www.error);
 			yield break;
 		}
 		
@@ -88,7 +88,7 @@ public class Downloader : MonoBehaviour {
 		yield return www;
 
 		if (!String.IsNullOrEmpty(www.error)) {
-			Debug.Log("www.error:" + www.error);
+			Debug.LogError("LoadCachedBundle www.error:" + www.error);
 			yield break;
 		}
 
@@ -110,12 +110,17 @@ public class Downloader : MonoBehaviour {
 		Debug.Log("udonTexture:" + udonTexture.name);
 
 
-		var sushiCube = GameObject.Find("SushiCube");
-		var udonCube = GameObject.Find("UdonCube");
+		{
+			var sushiCube = GameObject.Find("SushiCube");
+			var renderer = sushiCube.GetComponent<MeshRenderer>();
+			renderer.material.mainTexture = sushiTexture;
+		}
 
-		Debug.Log("sushiCube:" + sushiCube);
-		Debug.Log("udonCube:" + udonCube);
-
+		{
+			var udonCube = GameObject.Find("UdonCube");
+			var renderer = udonCube.GetComponent<MeshRenderer>();
+			renderer.material.mainTexture = sushiTexture;
+		}
 	}
 
 

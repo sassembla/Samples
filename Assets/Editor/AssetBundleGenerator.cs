@@ -16,7 +16,7 @@ public class AssetBundleGenerator {
 	static string bundleName = "SampleAssetBundle.unity3d";
 
 	// AssetBundle化したファイルを置く場所
-	static string outputBasePath = "bundlized";
+	static string outputBasePath = "bundlized1";
 	
 	
 	[MenuItem ("Window/Generate AssetBundle", false, 1)]
