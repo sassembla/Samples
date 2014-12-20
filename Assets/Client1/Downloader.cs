@@ -8,27 +8,26 @@ public class Downloader : MonoBehaviour {
 	/*
 		AssetBundleから取得できるResource名(ファイル自体はjpg)
 	*/
-	static string bundleResourceName1 = "sushi";
-	static string bundleResourceName2 = "udon";
+	const string bundleResourceName1 = "sushi";
+	const string bundleResourceName2 = "udon";
 
 	// AssetBundleのファイル名
-	static string bundleName = "SampleAssetBundle.unity3d";
+	const string constBundleName = "SampleAssetBundle.unity3d";
 
 	// AssetBundle化したファイルを置く場所
-	static string outputBasePath = "bundlized1";
+	const string outputBasePath = "bundlized1";
 
 	// ファイルプロトコル
 	const string fileProtocolStr = "file://";
 
 	// AssetBundleのDownloadを開始する
 	void Start () {
-		// Downloadを開始する
 		StartCoroutine(DownloadAssetBundleThenCache());
 	}
 
 
 	/**
-		CacheからResourceの読み込みを行う
+		AssetBundleのDownloadとCacheを行う
 	*/
 	IEnumerator DownloadAssetBundleThenCache() {
 		Debug.Log("start DownloadAssetBundleThenCache");
@@ -101,7 +100,7 @@ public class Downloader : MonoBehaviour {
 			www.assetBundleからAssetBundleを読み出し、
 			AssetBundleからResourceを読み出す。
 
-			AssetBundleに入っているResourceの名前を使用できる。
+			読み出しにはAssetBundleに入っているResourceの名前を使用できる。
 		*/
 		Texture2D sushiTexture = assetBundle.Load(bundleResourceName1) as Texture2D;
 		Debug.Log("sushiTexture:" + sushiTexture.name);
@@ -138,14 +137,14 @@ public class Downloader : MonoBehaviour {
 
 	/**
 		file://プロトコルのurlを返す
-			FULLPATH_OF_PROJECT_FOLDER/bundlize/bundleName
+			FULLPATH_OF_PROJECT_FOLDER/outputBasePath/bundleName
 	*/
 	private string GetFileProtocolUrl () {
 		// プロジェクトのパスを取得
 		var dataPath = Application.dataPath;
 		var projectPath = Directory.GetParent(dataPath).ToString();
 
-		var localUrlArray = new string[]{projectPath, outputBasePath, bundleName};
+		var localUrlArray = new string[]{projectPath, outputBasePath, constBundleName};
 		return fileProtocolStr + CombineAllPath(localUrlArray);
 	}
 

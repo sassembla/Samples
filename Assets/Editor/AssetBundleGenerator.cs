@@ -49,7 +49,7 @@ public class AssetBundleGenerator {
 		BuildTarget targetPlatform = EditorUserBuildSettings.activeBuildTarget;
 
 
-		// AssetBundleそれ自体のファイル名を加えたパス(この場合、PROJECT_FOLDER/outputBasePath/bundleName)
+		// AssetBundleそれ自体のファイル名を加えたパス(この場合、PROJECT_FOLDER/outputBasePath1/bundleName)
 		var assetBundleOutputPath = Path.Combine(outputBasePath1, bundleName);
 
 		uint crc;
@@ -96,7 +96,7 @@ public class AssetBundleGenerator {
 		BuildTarget targetPlatform = EditorUserBuildSettings.activeBuildTarget;
 
 
-		// AssetBundleそれ自体のファイル名を加えたパス(この場合、PROJECT_FOLDER/outputBasePath/bundleName)
+		// AssetBundleそれ自体のファイル名を加えたパス(この場合、PROJECT_FOLDER/outputBasePath2/bundleName)
 		var assetBundleOutputPath = Path.Combine(outputBasePath2, bundleName);
 
 		uint crc;
@@ -161,8 +161,15 @@ public class AssetBundleGenerator {
 		// output
 		var listOutputPath = Path.Combine(outputBasePath2, listName);
 		using (StreamWriter file = new StreamWriter(listOutputPath)) {
-            file.WriteLine(jsonStr);
-        }
+			file.WriteLine(jsonStr);
+		}
+
+		if (File.Exists(listOutputPath)) {
+			Debug.Log("list generated:" + listOutputPath);
+		} else {
+			Debug.Log("failed to generate list.");
+		}
+
 	}
 
 }
