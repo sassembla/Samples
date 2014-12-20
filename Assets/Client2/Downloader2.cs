@@ -10,7 +10,7 @@ using MiniJSONForSamlples;
 
 public class Downloader2 : MonoBehaviour {
 	/*
-		AssetBundleから取得できるResource名(ファイル自体はjpg)
+		AssetBundleから取得できるリソース名(ファイル自体はjpg)
 	*/
 	const string bundleResourceName1 = "sushi";
 	const string bundleResourceName2 = "udon";
@@ -51,11 +51,11 @@ public class Downloader2 : MonoBehaviour {
 
 
 
-	// リストのDownloadを開始する
+	// リストのダウンロードを開始する
 	void Start () {
-		Debug.Log("保存済みリストも空にする");
+
 		
-		// 毎回Downloadから実行するために、Cacheをすべて消す
+		// 毎回ダウンロードから実行するために、キャッシュをすべて消す
 		Caching.CleanCache();
 
 		StartCoroutine(DownloadList());
@@ -63,10 +63,10 @@ public class Downloader2 : MonoBehaviour {
 
 
 	/**
-		リストのDownloadを行う。
+		リストのダウンロードを行う。
 
 		・リストを取得(以降取得したリストを remoteリスト　と呼ぶ)
-		・現在Client内に保存されている リスト(以降localリストと呼ぶ)と、remoteリストの res_ver を比較
+		・現在クライアント内に保存されている リスト(以降localリストと呼ぶ)と、remoteリストの res_ver を比較
 		・res_ver が上がっている場合、リストに載っていないAssetBundleの取得を開始する
 	*/
 	IEnumerator DownloadList() {
@@ -102,7 +102,7 @@ public class Downloader2 : MonoBehaviour {
 		int.TryParse(localListData["res_ver"].ToString(), out local_res_ver);
 
 
-		// res_verに差があったら、内容を確認、DownloadすべきAssetBundleがあったらDownloadする。
+		// res_verに差があったら、内容を確認、ダウンロードすべきAssetBundleがあったらダウンロードする。
 		if (local_res_ver < remote_res_ver) {
 			Debug.Log("updated!");
 
@@ -123,7 +123,7 @@ public class Downloader2 : MonoBehaviour {
 			// remote, localの両方に含まれていて、 version が異なる bundleName を列挙
 			var bothContainedButVersionChanged = GetVersionGainedBundleNames(localAssetBundlesDict, remoteAssetBundlesDict);
 
-			// 名前を元に、DownloadすべきAssetBundleの取得を行う。
+			// 名前を元に、ダウンロードすべきAssetBundleの取得を行う。
 			var shouldDownloadAssetBundleNames = notContainedBundleNamesInLocal.Concat(bothContainedButVersionChanged).ToList();
 
 			var loadingAssetBundleNames = new List<string>(shouldDownloadAssetBundleNames);
@@ -161,8 +161,8 @@ public class Downloader2 : MonoBehaviour {
 			yield break;
 		}
 		
-		if (!Caching.IsVersionCached(url, version)) {
-			// 重量のあるResourceだと、Cacheまでに時間がかかるので、cachedになるまで待つ
+		while (!Caching.IsVersionCached(url, version)) {
+			// 重量のあるリソースだと、キャッシュまでに時間がかかるので、cachedになるまで待つ
 			yield return null;
 		}
 		var assetBundle = www.assetBundle;
@@ -176,15 +176,15 @@ public class Downloader2 : MonoBehaviour {
 	}
 
 	/**
-		すべてのDownloadすべきAssetBundleのDownloadが完了し、Cacheされたら呼ばれる。
+		すべてのダウンロードすべきAssetBundleのダウンロードが完了し、キャッシュされたら呼ばれる。
 	*/
 	private void AllAssetBundleCached (string remoteListDataStr) {
-		// 取得したリスト remoteリスト の内容をすべてCacheし終わったので、 remoteリスト をClient内に保存する。
+		// 取得したリスト remoteリスト の内容をすべてキャッシュし終わったので、 remoteリスト をクライアント内に保存する。
 		var saved = FileCache.UpdateList(remoteListDataStr);
 		
 
 		/*
-			新しくなったリストを使って、AssetBundleからResourceを取得する
+			新しくなったリストを使って、AssetBundleからリソースを取得する
 		*/
 		var newLocalListDataStr = saved;
 		
@@ -227,7 +227,7 @@ public class Downloader2 : MonoBehaviour {
 
 
 	/**
-		CacheからResourceの読み込みを行う
+		キャッシュからリソースの読み込みを行う
 	*/
 	IEnumerator LoadCachedBundle2 <T> (
 		string resourceName,
@@ -243,7 +243,7 @@ public class Downloader2 : MonoBehaviour {
 			var bundleName = bundledResourceNamesDict[resourceName];
 
 			/*
-				要求されたResourceが入っているAssetBundleが、
+				要求されたリソースが入っているAssetBundleが、
 				現在取得中のAssetBundleだったら、現在先行している取得が終わるまで待つ。
 			*/
 			while (cachedAssetBundleLoadingList.Contains(bundleName)) {
@@ -272,8 +272,8 @@ public class Downloader2 : MonoBehaviour {
 			}
 
 			/*
-				assetBundleがまだCacheからロードされていない場合、
-				cacheからロードを行い、Resourceを取り出して返す。
+				assetBundleがまだキャッシュからロードされていない場合、
+				キャッシュからロードを行い、リソースを取り出して返す。
 
 				読み出すための情報はすべてリストから取得できる。
 			*/
@@ -290,7 +290,7 @@ public class Downloader2 : MonoBehaviour {
 			/* 
 				loading control block.
 				
-				ひとつのAssetBundleに入っているResourceを取得中、おなじAssetBundleに入っている別Resourceを取得しにくると、
+				ひとつのAssetBundleに入っているリソースを取得中、おなじAssetBundleに入っている別リソースを取得しにくると、
 	
 				"Cannot load cached AssetBundle. A file of the same name is already loaded from another AssetBundle. "
 				

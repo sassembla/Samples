@@ -6,7 +6,7 @@ using System.Collections;
 
 public class Downloader : MonoBehaviour {
 	/*
-		AssetBundleから取得できるResource名(ファイル自体はjpg)
+		AssetBundleから取得できるリソース名(ファイル自体はjpg)
 	*/
 	const string bundleResourceName1 = "sushi";
 	const string bundleResourceName2 = "udon";
@@ -20,21 +20,21 @@ public class Downloader : MonoBehaviour {
 	// ファイルプロトコル
 	const string fileProtocolStr = "file://";
 
-	// AssetBundleのDownloadを開始する
+	// AssetBundleのダウンロードを開始する
 	void Start () {
 		StartCoroutine(DownloadAssetBundleThenCache());
 	}
 
 
 	/**
-		AssetBundleのDownloadとCacheを行う
+		AssetBundleのダウンロードとキャッシュを行う
 	*/
-	IEnumerator DownloadAssetBundleThenCache() {
+	IEnumerator DownloadAssetBundleThenCache () {
 		Debug.Log("start DownloadAssetBundleThenCache");
 		
 		if (!Caching.ready) yield return null;
 
-		// 毎回Downloadから実行するために、Cacheをすべて消す
+		// 毎回ダウンロードから実行するために、キャッシュをすべて消す
 		Caching.CleanCache();
 
 
@@ -52,8 +52,8 @@ public class Downloader : MonoBehaviour {
 			yield break;
 		}
 		
-		if (!Caching.IsVersionCached(url, version)) {
-			// 重量のあるResourceだと、Cacheまでに時間がかかるので、cachedになるまで待つ
+		while (!Caching.IsVersionCached(url, version)) {
+			// 重量のあるリソースだと、キャッシュ完了までに時間がかかるので、cachedになるまで待つ
 			yield return null;
 		}
 		Debug.Log("cached!!");
@@ -66,13 +66,13 @@ public class Downloader : MonoBehaviour {
 		www.Dispose();
 
 
-		// CacheからAssetBundleを読み出す
+		// キャッシュからAssetBundleを読み出す
 		StartCoroutine(LoadCachedBundle());
 	}
 
 
 	/**
-		CacheからResourceの読み込みを行う
+		キャッシュからリソースの読み込みを行う
 	*/
 	IEnumerator LoadCachedBundle() {
 		Debug.Log("start LoadCachedBundle");
@@ -98,9 +98,9 @@ public class Downloader : MonoBehaviour {
 
 		/*
 			www.assetBundleからAssetBundleを読み出し、
-			AssetBundleからResourceを読み出す。
+			AssetBundleからリソースを読み出す。
 
-			読み出しにはAssetBundleに入っているResourceの名前を使用できる。
+			読み出しにはAssetBundleに入っているリソースの名前を使用できる。
 		*/
 		Texture2D sushiTexture = assetBundle.Load(bundleResourceName1) as Texture2D;
 		Debug.Log("sushiTexture:" + sushiTexture.name);
