@@ -67,7 +67,7 @@ public class Downloader2 : MonoBehaviour {
 
 		・リストを取得(以降取得したリストを remoteリスト　と呼ぶ)
 		・現在クライアント内に保存されている リスト(以降localリストと呼ぶ)と、remoteリストの res_ver を比較
-		・res_ver が上がっている場合、リストに載っていないAssetBundleの取得を開始する
+		・res_ver が上がっている場合、localリストに載っていないAssetBundleと、remoteリストで更新されているAssetBundleの取得を開始する
 	*/
 	IEnumerator DownloadList() {
 		Debug.Log("start DownloadList");
