@@ -102,10 +102,10 @@ public class Downloader : MonoBehaviour {
 
 			読み出しにはAssetBundleに入っているリソースの名前を使用できる。
 		*/
-		Texture2D sushiTexture = assetBundle.Load(bundleResourceName1) as Texture2D;
+		Texture2D sushiTexture = assetBundle.LoadAsset(bundleResourceName1) as Texture2D;
 		Debug.Log("sushiTexture:" + sushiTexture.name);
 
-		Texture2D udonTexture = assetBundle.Load(bundleResourceName2) as Texture2D;
+		Texture2D udonTexture = assetBundle.LoadAsset(bundleResourceName2) as Texture2D;
 		Debug.Log("udonTexture:" + udonTexture.name);
 
 

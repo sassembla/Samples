@@ -6,8 +6,6 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 
-using MiniJSONForSamlples;
-
 public class Downloader2 : MonoBehaviour {
 	/*
 		AssetBundleから取得できるリソース名(ファイル自体はjpg)
@@ -88,26 +86,23 @@ public class Downloader2 : MonoBehaviour {
 		var remoteListDataStr = www.text;
 
 		// 取得したリストの情報を、"remoteから取得したデータ"として扱う
-		var remoteListData = Json.Deserialize(remoteListDataStr) as Dictionary<string, object>;
+		var remoteListData = JsonUtility.FromJson<ListData>(remoteListDataStr);
 
-		int remote_res_ver;
-		int.TryParse(remoteListData["res_ver"].ToString(), out remote_res_ver);
-		
+		string remote_res_ver = remoteListData.res_ver;
 
 		// localに保存してあるリストを読み出す
 		var localSavedListStr = FileCache.LoadSavedLocalList();
-		var localListData = Json.Deserialize(localSavedListStr) as Dictionary<string, object>;
+		var localListData = JsonUtility.FromJson<ListData>(localSavedListStr);
 
-		int local_res_ver;
-		int.TryParse(localListData["res_ver"].ToString(), out local_res_ver);
 
+		string local_res_ver = localListData.res_ver;
 
 		// res_verに差があったら、内容を確認、ダウンロードすべきAssetBundleがあったらダウンロードする。
-		if (local_res_ver < remote_res_ver) {
+		if (local_res_ver != remote_res_ver) {
 			Debug.Log("updated!");
 
-			var remoteAssetBundlesInfoList = remoteListData["assetBundles"] as List<object>;
-			var localAssetBundlesInfoList = localListData["assetBundles"] as List<object>;
+			var remoteAssetBundlesInfoList = remoteListData.assetBundles;
+			var localAssetBundlesInfoList = localListData.assetBundles;
 
 			var localAssetBundlesDict = GetContainedAssetBundleDictionary(localAssetBundlesInfoList);
 			var remoteAssetBundlesDict = GetContainedAssetBundleDictionary(remoteAssetBundlesInfoList);
@@ -188,8 +183,8 @@ public class Downloader2 : MonoBehaviour {
 		*/
 		var newLocalListDataStr = saved;
 		
-		var newLocalListData = Json.Deserialize(newLocalListDataStr) as Dictionary<string, object>;
-		var newLocalAssetBundlesInfoList = newLocalListData["assetBundles"] as List<object>;
+		var newLocalListData = JsonUtility.FromJson<ListData>(newLocalListDataStr);
+		var newLocalAssetBundlesInfoList = newLocalListData.assetBundles;
 
 		{
 			// AssetBundle名 : AssetBundle情報 の辞書を更新
@@ -259,7 +254,7 @@ public class Downloader2 : MonoBehaviour {
 			*/
 			if (onMemoryAssetBundleDict.ContainsKey(bundleName)) {
 				var assetBundle1 = onMemoryAssetBundleDict[bundleName];
-				var loadedResource1 = (T)assetBundle1.Load(resourceName, typeof(T));
+				var loadedResource1 = (T)assetBundle1.LoadAsset(resourceName, typeof(T));
 
 				if (loadedResource1 == null) {
 					failed(resourceName, "resouce-is-null-in-assetBundle-1:" + bundleName);
@@ -319,7 +314,7 @@ public class Downloader2 : MonoBehaviour {
 				onMemoryAssetBundleDict[bundleName] = assetBundle2;
 
 
-				var loadedResource2 = (T)assetBundle2.Load(resourceName, typeof(T));
+				var loadedResource2 = (T)assetBundle2.LoadAsset(resourceName, typeof(T));
 				
 				if (loadedResource2 == null) {
 					if (cachedAssetBundleLoadingList.Contains(bundleName)) cachedAssetBundleLoadingList.Remove(bundleName);
@@ -379,36 +374,15 @@ public class Downloader2 : MonoBehaviour {
 	/**
 		リストからAssetBundle名の列挙されたListを返す
 	*/
-	private Dictionary<string, BundleData> GetContainedAssetBundleDictionary (List<object> sourceList) {
+	private Dictionary<string, BundleData> GetContainedAssetBundleDictionary (List<BundleData> sourceList) {
 		var resultDict = new Dictionary<string, BundleData>();
 
-		foreach (var source in sourceList) {
-			var assetBundleInfo = source as Dictionary<string, object>;
-			var bundleData = new BundleData(assetBundleInfo);
+		foreach (var bundleData in sourceList) {
 			var bundleName = bundleData.bundleName;
 			resultDict[bundleName] = bundleData;
 		}
 
 		return resultDict;
-	}
-
-	class BundleData {
-		public readonly string bundleName;
-		public readonly int size;
-		public readonly int version;
-		public readonly uint crc;
-		public readonly string [] resourceNames;
-
-		public BundleData (Dictionary<string, object> source) {
-			bundleName = (string)source["bundleName"];
-			var sizeResult = int.TryParse(source["size"].ToString(), out size);
-			var versionResult = int.TryParse(source["version"].ToString(), out version);
-			var crcResult = uint.TryParse(source["crc"].ToString(), out crc);
-			resourceNames = ((string)source["resourceNames"]).Split(',');
-
-			if (sizeResult && versionResult && crcResult) {}
-			else Debug.Log("sizeResult:" + sizeResult + " versionResult:" + versionResult + " crcResult:" + crcResult);
-		}
 	}
 
 	/**

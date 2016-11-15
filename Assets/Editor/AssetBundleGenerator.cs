@@ -6,8 +6,6 @@ using System.IO;
 using System.Collections;
 using System.Collections.Generic;
 
-using MiniJSONForSamlples;
-
 public class AssetBundleGenerator {
 	/*
 		Resourcesから取得できるResource名(ファイル自体はjpg)
@@ -27,8 +25,8 @@ public class AssetBundleGenerator {
 	// リストのファイル名
 	static string listName = "list.json";
 
-	[MenuItem ("Window/Generate AssetBundle", false, 1)]
-	static void GenerateAssetBundle () {
+	
+	[MenuItem ("Window/Generate AssetBundle", false, 1)] static void GenerateAssetBundle () {
 		/*
 			assetBundleResource1, assetBundleResource2に、
 			ResourcesからResourceを読み出す
@@ -74,8 +72,8 @@ public class AssetBundleGenerator {
 		
 	}
 
-	[MenuItem ("Window/Generate AssetBundle and List", false, 1)]
-	static void GenerateAssetBundleAndList () {
+	
+	[MenuItem ("Window/Generate AssetBundle and List", false, 1)] static void GenerateAssetBundleAndList () {
 		/*
 			assetBundleResource1, assetBundleResource2に、
 			ResourcesからResourceを読み出す
@@ -89,8 +87,6 @@ public class AssetBundleGenerator {
 		if (assetBundleResource2 != null) {
 			Debug.Log("assetBundleResource2:" + assetBundleResource2.name);
 		}
-
-
 
 		// ターゲットプラットフォームの設定(現在のエディタの環境のものを読み込んで使用しています)
 		BuildTarget targetPlatform = EditorUserBuildSettings.activeBuildTarget;
@@ -107,7 +103,7 @@ public class AssetBundleGenerator {
 			new UnityEngine.Object[]{assetBundleResource2},
 			assetBundleOutputPath,
 			out crc,
-			BuildAssetBundleOptions.CollectDependencies | BuildAssetBundleOptions.CompleteAssets,
+			BuildAssetBundleOptions.None,
 			targetPlatform
 		);
 
@@ -156,13 +152,14 @@ public class AssetBundleGenerator {
 
 		jsonDict["assetBundles"] = assetBundlesList;
 
-		var jsonStr = Json.Serialize(jsonDict);
+		Debug.LogError("うーーん、まずはjsonを読み込む側を書いて、次に書き出す側を書くか。");
+		// var jsonStr = Json.Serialize(jsonDict);
 
 		// output
 		var listOutputPath = Path.Combine(outputBasePath2, listName);
-		using (StreamWriter file = new StreamWriter(listOutputPath)) {
-			file.WriteLine(jsonStr);
-		}
+		// using (StreamWriter file = new StreamWriter(listOutputPath)) {
+		// 	file.WriteLine(jsonStr);
+		// }
 
 		if (File.Exists(listOutputPath)) {
 			Debug.Log("list generated:" + listOutputPath);
