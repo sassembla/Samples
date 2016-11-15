@@ -49,7 +49,6 @@
   </ItemGroup>
   <ItemGroup>
      <Compile Include="Assets\Editor\AssetBundleGenerator.cs" />
-     <Compile Include="Assets\VSCode\Plugins\Editor\VSCode.cs" />
  <Reference Include="UnityEditor.Advertisements">
  <HintPath>/Applications/Unity5.4.2p4/Unity.app/Contents/UnityExtensions/Unity/Advertisements/Editor/UnityEditor.Advertisements.dll</HintPath>
  </Reference>
