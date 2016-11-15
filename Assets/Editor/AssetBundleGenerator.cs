@@ -127,46 +127,56 @@ public class AssetBundleGenerator {
 					"size": 100,
 					"version": 1,
 					"crc": 100,
-					"resourceNames": "sushi,udon"
+					"resourceNames": ["sushi", "udon"]
 				}
 			]
 		}
 		*/
-
-		FileInfo fileInfo = new FileInfo(assetBundleOutputPath);
-		var size = fileInfo.Length;
-
-		// JSON化する辞書を作成
-		var jsonDict = new Dictionary<string, object>();
-		jsonDict["res_ver"] = 1;
 		
-		var assetBundleInfoDict = new Dictionary<string, object>();
-		assetBundleInfoDict["bundleName"] = bundleName;// SampleAssetBundle.unity3d
-		assetBundleInfoDict["size"] = size;
-		assetBundleInfoDict["version"] = 1;
-		assetBundleInfoDict["crc"] = crc;
-		assetBundleInfoDict["resourceNames"] = bundleResourceName1 + "," + bundleResourceName2;
+		FileInfo fileInfo = new FileInfo(assetBundleOutputPath);
+		var size = (int)fileInfo.Length;
 
-		var assetBundlesList = new List<Dictionary<string, object>>();
-		assetBundlesList.Add(assetBundleInfoDict);
+		/*
+			JSON化するデータを作成
+		*/
 
-		jsonDict["assetBundles"] = assetBundlesList;
+		// 含まれているassetの名前一覧を用意。
+		var bundledAssetNames = new string[]{bundleResourceName1, bundleResourceName2};
 
-		Debug.LogError("うーーん、まずはjsonを読み込む側を書いて、次に書き出す側を書くか。");
-		// var jsonStr = Json.Serialize(jsonDict);
+		// このデモコードではこのAssetBundleのバージョンを1に指定している。
+		var version = 1;
+		
+		// AssetBundleのデータを用意。
+		var bundleData = new BundleData(bundleName, size, version, crc, bundledAssetNames);
+		
+		/*
+			このAssetBundleを入れるリストを作成する。
+		*/
+
+		// リストのバージョンを1に指定
+		var res_ver = "1";
+		
+		// 含むAssetBundleのリストを作成
+		var assetBundlesList = new List<BundleData>{bundleData};
+
+		// リストデータを作成。
+		var listData = new ListData(res_ver, assetBundlesList);
+		
+		// json化
+		var jsonStr = JsonUtility.ToJson(listData);
 
 		// output
 		var listOutputPath = Path.Combine(outputBasePath2, listName);
-		// using (StreamWriter file = new StreamWriter(listOutputPath)) {
-		// 	file.WriteLine(jsonStr);
-		// }
+		using (StreamWriter file = new StreamWriter(listOutputPath)) {
+			file.WriteLine(jsonStr);
+		}
 
 		if (File.Exists(listOutputPath)) {
 			Debug.Log("list generated:" + listOutputPath);
 		} else {
 			Debug.Log("failed to generate list.");
 		}
-
 	}
+
 
 }
